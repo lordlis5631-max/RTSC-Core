@@ -25,6 +25,18 @@ public sealed class AccessControlService(AppDbContext db)
             (x.Role == CommunityMemberRole.Owner || x.Role == CommunityMemberRole.Admin), cancellationToken);
     }
 
+    public async Task<bool> CanManageCommunityMembersAsync(Guid communityId, ClaimsPrincipal principal, CancellationToken cancellationToken = default)
+    {
+        if (IsGlobalAdmin(principal)) return true;
+        var userId = GetUserId(principal);
+        if (userId is null) return false;
+
+        return await db.CommunityMembers.AnyAsync(x =>
+            x.CommunityId == communityId &&
+            x.UserId == userId.Value &&
+            x.Role == CommunityMemberRole.Owner, cancellationToken);
+    }
+
     public async Task<bool> CanManageEventAsync(Guid eventId, ClaimsPrincipal principal, CancellationToken cancellationToken = default)
     {
         if (IsGlobalAdmin(principal)) return true;
