@@ -13,6 +13,8 @@ public sealed class User
 
     public List<ExternalAccount> ExternalAccounts { get; set; } = [];
     public List<Notification> Notifications { get; set; } = [];
+    public List<UserTagInterest> TagInterests { get; set; } = [];
+    public List<UserCategoryInterest> CategoryInterests { get; set; } = [];
 }
 
 public sealed class ExternalAccount
