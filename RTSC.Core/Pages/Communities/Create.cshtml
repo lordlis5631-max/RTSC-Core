@@ -1,0 +1,15 @@
+@page
+@model RTSC.Core.Pages.Communities.CreateModel
+@{
+    ViewData["Title"] = "Новое сообщество";
+}
+<div class="page-head">
+    <div><p class="eyebrow">Сообщества</p><h1>Новое сообщество</h1></div>
+</div>
+@if (!string.IsNullOrWhiteSpace(Model.Error)) { <p class="error">@Model.Error</p> }
+<form method="post" class="form wide-form">
+    <label>Название<input asp-for="Name" maxlength="250" required /></label>
+    <label>Описание<textarea asp-for="Description" rows="7"></textarea></label>
+    <label>Ссылка на логотип<input asp-for="LogoUrl" type="url" /></label>
+    <div class="actions"><button class="button" type="submit">Создать черновик</button><a class="button secondary" href="/Communities">Отмена</a></div>
+</form>

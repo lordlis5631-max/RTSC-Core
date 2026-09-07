@@ -1,0 +1,22 @@
+@page
+@model RTSC.Core.Pages.IndexModel
+@{
+    ViewData["Title"] = "Главная";
+}
+<section class="hero">
+    <div>
+        <p class="eyebrow">Новая версия платформы</p>
+        <h1>Мероприятия, сообщества и рейтинги без сложной инфраструктуры</h1>
+        <p>Один ASP.NET Core runtime, одна PostgreSQL база, единая админка и интеграции как подключаемые адаптеры.</p>
+        <div class="actions">
+            <a class="button" href="/Events">Смотреть мероприятия</a>
+            <a class="button secondary" href="/Communities">Сообщества</a>
+        </div>
+    </div>
+</section>
+
+<section class="grid stats">
+    <article><strong>@Model.CommunitiesCount</strong><span>сообществ</span></article>
+    <article><strong>@Model.EventsCount</strong><span>мероприятий</span></article>
+    <article><strong>@Model.UsersCount</strong><span>пользователей</span></article>
+</section>

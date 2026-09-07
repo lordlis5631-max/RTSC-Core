@@ -1,0 +1,29 @@
+@page
+@model RTSC.Core.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Админ";
+}
+<div class="page-head">
+    <div>
+        <p class="eyebrow">RTSC Core</p>
+        <h1>Админ-панель</h1>
+    </div>
+</div>
+
+<div class="grid stats">
+    <article><strong>@Model.Users</strong><span>пользователей</span></article>
+    <article><strong>@Model.PendingCommunities</strong><span>сообществ на модерации</span></article>
+    <article><strong>@Model.PendingEvents</strong><span>мероприятий на модерации</span></article>
+    <article><strong>@Model.PendingComments</strong><span>комментариев на модерации</span></article>
+    <article><strong>@Model.LinkedMaxAccounts</strong><span>привязано MAX</span></article>
+    <article><strong>@Model.DeliveryProblems</strong><span>проблем доставки</span></article>
+</div>
+
+<div class="admin-links">
+    <a class="card link-card" href="/Admin/Communities"><h2>Сообщества</h2><p>Одобрение и отклонение.</p></a>
+    <a class="card link-card" href="/Admin/Events"><h2>Мероприятия</h2><p>Публикация заявок.</p></a>
+    <a class="card link-card" href="/Admin/Comments"><h2>Комментарии</h2><p>Модерация и удаление.</p></a>
+    <a class="card link-card" href="/Admin/Users"><h2>Пользователи</h2><p>Статусы и роли.</p></a>
+    <a class="card link-card" href="/Admin/Integrations"><h2>Интеграции</h2><p>MAX сейчас; VK и Telegram через тот же слой.</p></a>
+    <a class="card link-card" href="/Admin/Notifications"><h2>Доставка</h2><p>Очередь, ошибки и ручной retry.</p></a>
+</div>

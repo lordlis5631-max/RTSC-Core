@@ -1,0 +1,67 @@
+@page
+@model RTSC.Core.Pages.Admin.IntegrationsModel
+@{
+    ViewData["Title"] = "Интеграции";
+}
+<div class="page-head">
+    <div>
+        <p class="eyebrow">Админ · интеграции</p>
+        <h1>Мессенджеры</h1>
+        <p class="muted">MAX, Telegram и VK используют одну модель ExternalAccount и одну очередь NotificationDelivery. Бизнес-логика остаётся в RTSC Core.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="notice">@Model.Message</p>
+}
+
+<div class="cards">
+    <article class="card">
+        <div class="page-head mini">
+            <div><p class="eyebrow">Канал</p><h2>MAX</h2></div>
+            <span class="badge">@(Model.Max.Configured ? "token configured" : "token missing")</span>
+        </div>
+        <dl class="config-list">
+            <div><dt>Webhook</dt><dd>@(Model.Max.WebhookUrl ?? "не задан")</dd></div>
+            <div><dt>Публичный адрес</dt><dd>@(Model.Max.PublicBaseUrl ?? "не задан")</dd></div>
+            <div><dt>Ссылка на бота</dt><dd>@(Model.Max.BotUrl ?? "не задана")</dd></div>
+            <div><dt>Webhook secret</dt><dd>@(Model.Max.WebhookConfigured ? "настроен" : "не настроен")</dd></div>
+        </dl>
+        <form method="post" asp-page-handler="ConfigureMaxWebhook">
+            <button class="button" type="submit" disabled="@(!Model.Max.Configured || !Model.Max.WebhookConfigured)">Зарегистрировать webhook MAX</button>
+        </form>
+    </article>
+
+    <article class="card">
+        <div class="page-head mini">
+            <div><p class="eyebrow">Канал</p><h2>Telegram</h2></div>
+            <span class="badge">@(Model.Telegram.Configured ? "token configured" : "token missing")</span>
+        </div>
+        <dl class="config-list">
+            <div><dt>Webhook</dt><dd>@(Model.Telegram.WebhookUrl ?? "не задан")</dd></div>
+            <div><dt>Публичный адрес</dt><dd>@(Model.Telegram.PublicBaseUrl ?? "не задан")</dd></div>
+            <div><dt>Ссылка на бота</dt><dd>@(Model.Telegram.BotUrl ?? "не задана")</dd></div>
+            <div><dt>Webhook secret</dt><dd>@(Model.Telegram.WebhookConfigured ? "настроен" : "не настроен")</dd></div>
+        </dl>
+        <form method="post" asp-page-handler="ConfigureTelegramWebhook">
+            <button class="button" type="submit" disabled="@(!Model.Telegram.Configured || !Model.Telegram.WebhookConfigured)">Зарегистрировать webhook Telegram</button>
+        </form>
+    </article>
+
+    <article class="card">
+        <div class="page-head mini">
+            <div><p class="eyebrow">Канал</p><h2>VK</h2></div>
+            <span class="badge">@(Model.Vk.Configured ? "token configured" : "token/group missing")</span>
+        </div>
+        <dl class="config-list">
+            <div><dt>Callback URL</dt><dd>@(Model.Vk.CallbackUrl ?? "не задан")</dd></div>
+            <div><dt>Group ID</dt><dd>@(Model.Vk.GroupId ?? "не задан")</dd></div>
+            <div><dt>API version</dt><dd>@(Model.Vk.ApiVersion ?? "не задана")</dd></div>
+            <div><dt>Ссылка на сообщения</dt><dd>@(Model.Vk.BotUrl ?? "не задана")</dd></div>
+            <div><dt>Secret</dt><dd>@(Model.Vk.SecretConfigured ? "настроен" : "не настроен")</dd></div>
+            <div><dt>Confirmation code</dt><dd>@(Model.Vk.ConfirmationConfigured ? "настроен" : "не настроен")</dd></div>
+        </dl>
+        <p class="muted">Callback-сервер VK добавляется в настройках сообщества вручную. RTSC уже умеет отвечать на confirmation и message_new.</p>
+    </article>
+</div>

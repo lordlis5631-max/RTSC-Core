@@ -1,0 +1,16 @@
+@page
+@model RTSC.Core.Pages.RegisterModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+<h1>Регистрация</h1>
+@if (!string.IsNullOrWhiteSpace(Model.Error))
+{
+    <p class="error">@Model.Error</p>
+}
+<form method="post" class="form">
+    <label>Имя<input asp-for="DisplayName" required /></label>
+    <label>Email<input asp-for="Email" type="email" required /></label>
+    <label>Пароль<input asp-for="Password" type="password" minlength="8" required /></label>
+    <button class="button" type="submit">Создать аккаунт</button>
+</form>

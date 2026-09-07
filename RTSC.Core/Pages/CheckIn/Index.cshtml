@@ -1,0 +1,16 @@
+@page "/CheckIn"
+@model RTSC.Core.Pages.CheckIn.IndexModel
+@{
+    ViewData["Title"] = "Отметка посещения";
+}
+@if (!string.IsNullOrWhiteSpace(Model.Error))
+{
+    <div class="card"><h1>QR не принят</h1><p class="error">@Model.Error</p></div>
+}
+else if (Model.Ticket is not null)
+{
+    <div class="card checkin-card"><p class="eyebrow">Отметка посещения</p><h1>@Model.Ticket.UserName</h1><p><strong>@Model.Ticket.EventTitle</strong></p><p>@Model.Ticket.UserEmail</p><span class="badge">@Model.Ticket.Status</span>
+    @if (Model.Ticket.Status != "Attended") { <form method="post" class="actions"><input type="hidden" asp-for="Token"/><button class="button" type="submit">Подтвердить посещение</button></form> }
+    else { <p class="notice">Посещение уже подтверждено.</p> }
+    </div>
+}

@@ -1,0 +1,5 @@
+@page
+@model RTSC.Core.Pages.Admin.CommentsModel
+@{ ViewData["Title"] = "Модерация комментариев"; }
+<div class="page-head"><div><p class="eyebrow">Админ</p><h1>Комментарии</h1></div></div>
+<div class="stack">@foreach (var item in Model.Items) { <article class="card"><div class="meta"><strong>@item.AuthorName</strong><span class="badge">@item.Status</span><span>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span></div><p class="comment-text">@item.Text</p><div class="actions compact"><form method="post" asp-page-handler="Status"><input type="hidden" name="id" value="@item.Id"/><input type="hidden" name="status" value="Published"/><button class="link-button" type="submit">Опубликовать</button></form><form method="post" asp-page-handler="Status"><input type="hidden" name="id" value="@item.Id"/><input type="hidden" name="status" value="Hidden"/><button class="link-button" type="submit">Скрыть</button></form><form method="post" asp-page-handler="Status"><input type="hidden" name="id" value="@item.Id"/><input type="hidden" name="status" value="Deleted"/><button class="link-button danger" type="submit">Удалить</button></form></div></article> }</div>

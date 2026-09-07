@@ -1,0 +1,17 @@
+@page "/Events/{id:guid}/Edit"
+@model RTSC.Core.Pages.Events.EditModel
+@{
+    ViewData["Title"] = "Редактирование мероприятия";
+}
+<h1>Редактирование мероприятия</h1>
+@if (!string.IsNullOrWhiteSpace(Model.Error)) { <p class="error">@Model.Error</p> }
+<form method="post" class="form wide-form">
+    <label>Название<input asp-for="Title" maxlength="300" required /></label>
+    <label>Описание<textarea asp-for="Description" rows="8"></textarea></label>
+    <div class="form-grid"><label>Начало<input asp-for="StartAtLocal" type="datetime-local" required /></label><label>Окончание<input asp-for="EndAtLocal" type="datetime-local" /></label></div>
+    <label>Место<input asp-for="Place" maxlength="500" /></label>
+    <label>Лимит участников<input asp-for="Capacity" type="number" min="1" /></label>
+    <div class="form-grid"><label>Регистрация с<input asp-for="RegistrationStartLocal" type="datetime-local" /></label><label>Регистрация до<input asp-for="RegistrationEndLocal" type="datetime-local" /></label></div>
+    <label>Ссылка на изображение<input asp-for="ImageUrl" type="url" /></label>
+    <div class="actions"><button class="button" type="submit">Сохранить</button><a class="button secondary" href="/Events/@Model.Id">Назад</a></div>
+</form>

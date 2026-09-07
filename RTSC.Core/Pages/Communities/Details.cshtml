@@ -1,0 +1,38 @@
+@page "/Communities/{id:guid}"
+@model RTSC.Core.Pages.Communities.DetailsModel
+@{
+    ViewData["Title"] = Model.Item?.Name ?? "Сообщество";
+}
+@if (Model.Item is null)
+{
+    <div class="empty"><h1>Сообщество не найдено</h1></div>
+}
+else
+{
+    <div class="page-head">
+        <div>
+            <p class="eyebrow">Сообщество</p>
+            <h1>@Model.Item.Name</h1>
+            <div class="meta"><span class="badge">@Model.Item.Status</span><span>@Model.Item.MemberCount участников</span></div>
+        </div>
+        @if (Model.CanManage)
+        {
+            <div class="actions"><a class="button" href="/Communities/@Model.Item.Id/Edit">Редактировать</a><a class="button secondary" href="/Events/Create?communityId=@Model.Item.Id">Создать мероприятие</a></div>
+        }
+    </div>
+    <section class="card prose"><p>@Model.Item.Description</p></section>
+    @if (Model.CanManage && (Model.Item.Status == "Draft" || Model.Item.Status == "Rejected"))
+    {
+        <form method="post" asp-page-handler="Submit" class="inline-form"><button class="button" type="submit">Отправить на модерацию</button></form>
+    }
+    <section class="section">
+        <h2>Мероприятия</h2>
+        <div class="cards">
+        @foreach (var evt in Model.Events)
+        {
+            <a class="card link-card" href="/Events/@evt.Id"><p class="eyebrow">@evt.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p><h3>@evt.Title</h3><p>@evt.Place</p><span class="badge">@evt.Status</span></a>
+        }
+        @if (Model.Events.Count == 0) { <p class="muted">Пока нет мероприятий.</p> }
+        </div>
+    </section>
+}

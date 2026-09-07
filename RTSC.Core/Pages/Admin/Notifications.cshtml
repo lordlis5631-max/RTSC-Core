@@ -1,0 +1,55 @@
+@page
+@model RTSC.Core.Pages.Admin.NotificationsModel
+@{
+    ViewData["Title"] = "Доставка уведомлений";
+}
+<div class="page-head">
+    <div>
+        <p class="eyebrow">Админ · диагностика</p>
+        <h1>Доставка уведомлений</h1>
+        <p class="muted">Одна очередь для всех мессенджеров. Ошибка конкретного канала не ломает основное приложение.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="notice">@Model.Message</p>
+}
+
+<div class="table-wrap">
+    <table>
+        <thead>
+        <tr>
+            <th>Пользователь</th>
+            <th>Уведомление</th>
+            <th>Канал</th>
+            <th>Статус</th>
+            <th>Попытки</th>
+            <th>Ошибка</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td><strong>@item.UserName</strong><br/><span class="muted">@item.Email</span></td>
+                <td>@item.Title<br/><span class="muted">@item.CreatedAt.ToLocalTime().ToString("dd.MM HH:mm")</span></td>
+                <td>@item.Channel</td>
+                <td><span class="badge">@item.Status</span></td>
+                <td>@item.Attempts</td>
+                <td class="delivery-error">@item.Error</td>
+                <td>
+                    @if (item.Status is "Failed" or "Dead")
+                    {
+                        <form method="post" asp-page-handler="Retry">
+                            <input type="hidden" name="id" value="@item.Id"/>
+                            <button class="link-button" type="submit">Повторить</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

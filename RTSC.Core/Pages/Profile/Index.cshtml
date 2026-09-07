@@ -1,0 +1,134 @@
+@page "/Profile"
+@model RTSC.Core.Pages.Profile.IndexModel
+@{
+    ViewData["Title"] = "Профиль";
+}
+
+<div class="page-head">
+    <div>
+        <p class="eyebrow">Личный кабинет</p>
+        <h1>@Model.CurrentUser?.DisplayName</h1>
+        <div class="meta">
+            <span>@Model.CurrentUser?.Email</span>
+            <span class="badge">@Model.CurrentUser?.Role</span>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <p class="notice">@Model.Message</p>
+}
+
+<section class="section">
+    <div class="page-head mini">
+        <div>
+            <h2>Связанные аккаунты</h2>
+            <p class="muted">Мессенджеры используются только для входа/привязки и уведомлений. Основная работа остаётся в веб-версии.</p>
+        </div>
+        <div class="actions compact">
+            <form method="post" asp-page-handler="CreateMaxLink"><button class="button" type="submit">Подключить MAX</button></form>
+            <form method="post" asp-page-handler="CreateTelegramLink"><button class="button secondary" type="submit">Подключить Telegram</button></form>
+            <form method="post" asp-page-handler="CreateVkLink"><button class="button secondary" type="submit">Подключить VK</button></form>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.LinkCode))
+    {
+        var provider = Model.LinkProvider ?? "мессенджер";
+        var botUrl = provider switch
+        {
+            "Max" => Model.MaxBotUrl,
+            "Telegram" => Model.TelegramBotUrl,
+            "Vk" => Model.VkBotUrl,
+            _ => null
+        };
+        <article class="card link-code-card">
+            <p class="eyebrow">Одноразовый код @provider</p>
+            <div class="link-code">@Model.LinkCode</div>
+            <p>Отправьте боту/сообществу команду <strong>/link @Model.LinkCode</strong>.</p>
+            @if (!string.IsNullOrWhiteSpace(botUrl))
+            {
+                <p><a class="button secondary" href="@botUrl" target="_blank" rel="noopener">Открыть @provider</a></p>
+            }
+            <p class="muted">Код действует до @Model.LinkExpiresAt и становится недействительным сразу после использования.</p>
+        </article>
+    }
+
+    @if (Model.Accounts.Count == 0)
+    {
+        <div class="empty"><p>Мессенджеры пока не привязаны.</p></div>
+    }
+    else
+    {
+        <div class="cards">
+            @foreach (var account in Model.Accounts)
+            {
+                <article class="card">
+                    <div class="page-head mini">
+                        <div>
+                            <p class="eyebrow">@account.Provider</p>
+                            <h3>@(string.IsNullOrWhiteSpace(account.Username) ? account.ExternalUserId : $"@{account.Username}")</h3>
+                        </div>
+                        <span class="badge">подключён</span>
+                    </div>
+                    <p class="muted">Привязан @account.LinkedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+                    @if (account.LastSeenAt is not null)
+                    {
+                        <p class="muted">Последний контакт: @account.LastSeenAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+                    }
+                    <div class="actions compact">
+                        <form method="post" asp-page-handler="ToggleNotifications">
+                            <input type="hidden" name="accountId" value="@account.Id" />
+                            <input type="hidden" name="enabled" value="@(!account.NotificationsEnabled)" />
+                            <button class="button secondary" type="submit">@(account.NotificationsEnabled ? "Отключить уведомления" : "Включить уведомления")</button>
+                        </form>
+                        <form method="post" asp-page-handler="Unlink">
+                            <input type="hidden" name="accountId" value="@account.Id" />
+                            <button class="link-button danger" type="submit">Отвязать</button>
+                        </form>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
+
+<section class="section">
+    <div class="page-head mini">
+        <div>
+            <h2>Уведомления</h2>
+            <p class="muted">История сохраняется в веб-версии независимо от доставки в мессенджер.</p>
+        </div>
+        @if (Model.Notifications.Any(x => x.ReadAt is null))
+        {
+            <form method="post" asp-page-handler="MarkAllRead">
+                <button class="button secondary" type="submit">Отметить всё прочитанным</button>
+            </form>
+        }
+    </div>
+
+    <div class="stack">
+        @foreach (var notification in Model.Notifications)
+        {
+            <article class="card notification-card @(notification.ReadAt is null ? "unread" : "")">
+                <div class="page-head mini">
+                    <div>
+                        <p class="eyebrow">@notification.Type</p>
+                        <h3>@notification.Title</h3>
+                    </div>
+                    <span class="muted">@notification.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                </div>
+                <p>@notification.Body</p>
+                @if (!string.IsNullOrWhiteSpace(notification.TargetUrl))
+                {
+                    <a class="link-button" href="@notification.TargetUrl">Открыть</a>
+                }
+            </article>
+        }
+        @if (Model.Notifications.Count == 0)
+        {
+            <div class="empty"><p>Уведомлений пока нет.</p></div>
+        }
+    </div>
+</section>

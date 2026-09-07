@@ -1,0 +1,5 @@
+@page
+@model RTSC.Core.Pages.Admin.CommunitiesModel
+@{ ViewData["Title"] = "Модерация сообществ"; }
+<div class="page-head"><div><p class="eyebrow">Админ</p><h1>Сообщества</h1></div></div>
+<div class="table-wrap"><table><thead><tr><th>Название</th><th>Статус</th><th>Создано</th><th>Действия</th></tr></thead><tbody>@foreach (var item in Model.Items) { <tr><td><a href="/Communities/@item.Id"><strong>@item.Name</strong></a></td><td><span class="badge">@item.Status</span></td><td>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")</td><td><div class="actions compact"><form method="post" asp-page-handler="Status"><input type="hidden" name="id" value="@item.Id"/><input type="hidden" name="status" value="Published"/><button class="link-button" type="submit">Опубликовать</button></form><form method="post" asp-page-handler="Status"><input type="hidden" name="id" value="@item.Id"/><input type="hidden" name="status" value="Rejected"/><button class="link-button danger" type="submit">Отклонить</button></form></div></td></tr> }</tbody></table></div>

@@ -1,0 +1,11 @@
+@page
+@model RTSC.Core.Pages.Communities.IndexModel
+@{
+    ViewData["Title"] = "Сообщества";
+}
+<div class="page-head"><div><p class="eyebrow">Каталог</p><h1>Сообщества</h1></div>@if (User.Identity?.IsAuthenticated == true) { <a class="button" href="/Communities/Create">Создать сообщество</a> }</div>
+@if (Model.Managed.Count > 0)
+{
+<section class="section"><h2>Мои сообщества</h2><div class="cards">@foreach (var item in Model.Managed) { <a class="card link-card" href="/Communities/@item.Id"><h3>@item.Name</h3><p>@item.Description</p><span class="badge">@item.Status</span></a> }</div></section>
+}
+<section class="section"><h2>Опубликованные</h2><div class="cards">@foreach (var item in Model.Items) { <a class="card link-card" href="/Communities/@item.Id"><h3>@item.Name</h3><p>@item.Description</p><span class="badge">@item.Status</span></a> } @if (Model.Items.Count == 0) { <p class="muted">Пока нет опубликованных сообществ.</p> }</div></section>
