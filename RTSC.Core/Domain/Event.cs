@@ -6,6 +6,7 @@ public sealed class Event
     public Guid CommunityId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public EventCategory Category { get; set; } = EventCategory.Other;
     public DateTimeOffset StartAt { get; set; }
     public DateTimeOffset? EndAt { get; set; }
     public string Place { get; set; } = string.Empty;
@@ -21,6 +22,7 @@ public sealed class Event
     public Community Community { get; set; } = null!;
     public List<EventParticipant> Participants { get; set; } = [];
     public List<EventPerformer> Performers { get; set; } = [];
+    public List<EventTag> Tags { get; set; } = [];
 }
 
 public sealed class EventParticipant
