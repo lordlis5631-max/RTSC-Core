@@ -65,18 +65,17 @@ public sealed class IndexModel(AppDbContext db) : PageModel
 
         var rows = await query
             .OrderBy(x => x.StartAt)
-            .Select(x => new Item(
+            .Select(x => new DbItem(
                 x.Id,
                 x.Title,
                 x.Description,
                 x.Place,
                 x.StartAt,
                 x.Community.Name,
-                EventCategoryCatalog.Label(x.Category),
+                x.Category,
                 x.Capacity,
                 x.Participants.Count(p => p.Status != ParticipantStatus.Cancelled),
-                x.Latitude != null && x.Longitude != null,
-                []))
+                x.Latitude != null && x.Longitude != null))
             .ToListAsync();
 
         var eventIds = rows.Select(x => x.Id).ToArray();
@@ -88,7 +87,20 @@ public sealed class IndexModel(AppDbContext db) : PageModel
                 .Select(x => new EventTagVm(x.EventId, x.Tag.Name))
                 .ToListAsync();
         var tagsByEvent = tagRows.GroupBy(x => x.EventId).ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Select(t => t.Name).ToList());
-        Items = rows.Select(x => x with { Tags = tagsByEvent.GetValueOrDefault(x.Id, []) }).ToList();
+
+        Items = rows.Select(x => new Item(
+            x.Id,
+            x.Title,
+            x.Description,
+            x.Place,
+            x.StartAt,
+            x.CommunityName,
+            EventCategoryCatalog.Label(x.Category),
+            x.Capacity,
+            x.Registered,
+            x.HasLocation,
+            tagsByEvent.GetValueOrDefault(x.Id, [])))
+            .ToList();
 
         Communities = await db.Communities.AsNoTracking()
             .Where(x => x.Status == CommunityStatus.Published)
@@ -116,21 +128,11 @@ public sealed class IndexModel(AppDbContext db) : PageModel
         return true;
     }
 
-    public sealed record Item(
-        Guid Id,
-        string Title,
-        string Description,
-        string Place,
-        DateTimeOffset StartAt,
-        string CommunityName,
-        string Category,
-        int? Capacity,
-        int Registered,
-        bool HasLocation,
-        IReadOnlyList<string> Tags);
+    private sealed record DbItem(Guid Id, string Title, string Description, string Place, DateTimeOffset StartAt, string CommunityName, EventCategory Category, int? Capacity, int Registered, bool HasLocation);
+    private sealed record EventTagVm(Guid EventId, string Name);
 
+    public sealed record Item(Guid Id, string Title, string Description, string Place, DateTimeOffset StartAt, string CommunityName, string Category, int? Capacity, int Registered, bool HasLocation, IReadOnlyList<string> Tags);
     public sealed record CommunityVm(Guid Id, string Name);
     public sealed record CategoryVm(EventCategory Value, string Label);
     public sealed record TagVm(Guid Id, string Name);
-    private sealed record EventTagVm(Guid EventId, string Name);
 }
