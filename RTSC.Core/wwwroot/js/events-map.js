@@ -1,0 +1,41 @@
+(() => {
+    const host = document.getElementById('events-map');
+    if (!host || typeof L === 'undefined') return;
+
+    let points = [];
+    try {
+        points = JSON.parse(host.dataset.points || '[]');
+    } catch {
+        points = [];
+    }
+
+    const map = L.map('events-map', { scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const bounds = [];
+    for (const point of points) {
+        const marker = L.marker([point.latitude, point.longitude]).addTo(map);
+        const popup = document.createElement('div');
+        const title = document.createElement('a');
+        title.href = `/Events/${point.id}`;
+        title.textContent = point.title;
+        title.className = 'map-popup-title';
+
+        const meta = document.createElement('div');
+        meta.textContent = `${new Date(point.startAt).toLocaleString('ru-RU')} · ${point.communityName}`;
+
+        const place = document.createElement('div');
+        place.textContent = point.place;
+
+        popup.append(title, meta, place);
+        marker.bindPopup(popup);
+        bounds.push([point.latitude, point.longitude]);
+    }
+
+    if (bounds.length === 1) map.setView(bounds[0], 14);
+    else if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30] });
+    else map.setView([54.7351, 55.9587], 11);
+})();

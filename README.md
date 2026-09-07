@@ -1,6 +1,6 @@
 # RTSC-Core
 
-RTSC-Core — новый RTSC, переписанный с нуля как простой модульный монолит. Текущая версия: **0.9.0**.
+RTSC-Core — новый RTSC, переписанный с нуля как простой модульный монолит. Текущая версия: **1.0.0**.
 
 ## Архитектура
 
@@ -22,92 +22,58 @@ Razor Pages + API + Auth
 ### Пользователи и доступ
 - регистрация и вход;
 - cookie authentication;
-- глобальные роли `User / Admin / SuperAdmin`;
+- роли `User / Admin / SuperAdmin`;
 - блокировка пользователей;
 - bootstrap `SuperAdmin`;
-- `/My` — рабочий личный кабинет пользователя;
-- после входа пользователь попадает сразу в `Мой RTSC`;
-- профиль пользователя;
-- `ExternalAccount` для MAX/Telegram/VK;
-- одноразовые безопасные коды привязки внешних аккаунтов.
+- `/My` — рабочий личный кабинет;
+- профиль и `ExternalAccount` для MAX/Telegram/VK;
+- одноразовые безопасные коды привязки;
+- усиленная валидация API auth;
+- автоматический rehash пароля при необходимости.
 
 ### Мой RTSC и персонализация
-- ближайшие зарегистрированные мероприятия;
-- быстрый доступ к QR-билетам;
-- история участия;
-- статистика регистраций и посещений;
-- непрочитанные уведомления;
-- мероприятия, где пользователь назначен исполнителем;
-- сообщества, которыми пользователь управляет;
-- быстрые действия владельца/администратора сообщества;
-- ближайшие организаторские мероприятия;
-- настройка интересов в `/My/Interests`;
-- явный выбор категорий и до 12 тегов интересов;
-- персональная подборка ближайших мероприятий;
-- прозрачный recommendation score: совпавшая категория + совпавшие теги;
-- объяснение причины каждой рекомендации;
-- уже зарегистрированные события не предлагаются повторно.
+- ближайшие регистрации и QR-билеты;
+- история участия и статистика;
+- организаторские задачи и назначения исполнителем;
+- `/My/Interests`;
+- явный выбор категорий и тегов;
+- прозрачная персональная подборка без скрытых признаков;
+- объяснение причины рекомендации.
 
-### Сообщества
-- создание, редактирование и модерация;
-- роли `Owner / Admin / Member`;
-- управление администраторами сообщества через UI;
-- назначение администратора по email;
-- защита владельца от случайного удаления/понижения.
+### Сообщества и мероприятия
+- сообщества, роли `Owner / Admin / Member`, модерация;
+- управление администраторами;
+- CRUD и модерация мероприятий;
+- категории и до 8 тегов;
+- поиск и фильтры;
+- календарь и карта;
+- регистрация, подтверждение, QR-ticket и check-in;
+- исполнители, завершение, CSV-экспорт;
+- аналитика регистрации и посещаемости.
 
-### Мероприятия
-- создание, редактирование и модерация;
-- категория мероприятия;
-- до 8 тегов на мероприятие;
-- публичная афиша;
-- поиск по названию, описанию, месту, сообществу и тегам;
-- фильтры по сообществу, категории, тегу, месту и датам;
-- публичный календарь;
-- публичная карта мероприятий;
-- необязательные координаты `Latitude / Longitude` с проверкой диапазонов;
-- вместимость и окно регистрации;
-- регистрация и отмена участия;
-- управление участниками;
-- назначение исполнителей;
-- персональный подписанный QR-билет;
-- check-in организатором;
-- завершение мероприятия;
-- CSV-экспорт участников;
-- аналитика конкретного мероприятия: воронка, явка, отмены, заполнение лимита, рейтинги, регистрации по дням.
+### Рейтинги, уведомления и интеграции
+- рейтинг исполнителей по последним 20 событиям;
+- рейтинг участников организатором;
+- комментарии и модерация;
+- outbox-style `NotificationDelivery` с retry/dead;
+- MAX, Telegram и VK;
+- webhook/callback secret validation;
+- напоминания за 24 часа и 2 часа.
 
-### Рейтинги и модерация
-- оценка исполнителей участниками;
-- рейтинг исполнителя по последним 20 мероприятиям;
-- оценка участника организатором;
-- комментарии к оценкам;
-- первичная фильтрация риск-слов;
-- ручная модерация комментариев.
-
-### Уведомления и мессенджеры
-- web-история уведомлений;
-- единая очередь `NotificationDelivery` с retry/dead-state;
-- MAX через обычный `HttpClient`;
-- MAX webhook;
-- Telegram Bot API sender + webhook;
-- VK Callback API + `messages.send`;
-- автоматические напоминания до 24 часов и до 2 часов до мероприятия;
-- мониторинг ошибок доставки и ручной retry.
-
-### Администрирование и отчёты
-- единая `/Admin` панель;
-- модерация сообществ, мероприятий и комментариев;
-- управление пользователями;
-- административная отчётность;
-- статистика регистраций и посещаемости;
-- список популярных мероприятий.
-
-### Эксплуатация
-- Dockerfile + Docker Compose;
-- PostgreSQL bootstrap schema;
-- upgrade SQL migrations;
-- постоянный volume для Data Protection keys;
-- GitHub Actions CI;
-- smoke-check script.
+### Production hardening v1.0
+- antiforgery/CSRF для mutating browser API;
+- `/api/security/csrf` для JSON-клиентов с cookie auth;
+- отдельное исключение для secret-protected MAX/TG/VK webhook;
+- per-client rate limiting для auth/API/webhook/web/health;
+- secure `__Host-` cookie в Production;
+- CSP и security headers;
+- отключён Kestrel Server header;
+- лимит request body;
+- `/health/live` и `/health/ready`;
+- unit/regression tests;
+- NuGet vulnerability audit как CI gate;
+- расширенный smoke-check;
+- production checklist: `docs/PRODUCTION.md`.
 
 ## Основные страницы
 
@@ -145,7 +111,7 @@ BOOTSTRAP_ADMIN_PASSWORD=strong-password
 BOOTSTRAP_ADMIN_NAME=Super Admin
 ```
 
-По умолчанию приложение доступно на `http://localhost:8080`.
+Для production используйте HTTPS reverse proxy. Подробный checklist: `docs/PRODUCTION.md`.
 
 ## Обновление существующей базы
 
@@ -158,43 +124,45 @@ psql "$CONNECTION_STRING" -f db/migrations/004_event_location.sql
 psql "$CONNECTION_STRING" -f db/migrations/005_personalization.sql
 ```
 
-`005_personalization.sql` добавляет категорию события, каталог тегов, связи `event_tags`, а также явные интересы пользователя `user_tag_interests` и `user_category_interests`. Скрипт также создаёт базовый каталог тегов.
+**v1.0 не меняет схему PostgreSQL**, отдельная migration для production-hardening не требуется.
 
-Для свежей установки отдельные migration scripts не нужны: `db/init/001_initial.sql` содержит актуальную bootstrap schema v0.9.
+Для свежей установки `db/init/001_initial.sql` содержит актуальную bootstrap schema.
 
-## Как работают рекомендации
+## CSRF для JSON API
+
+Для `POST/PUT/PATCH/DELETE` под `/api` браузерный клиент сначала получает токен:
 
 ```text
-Пользователь сам выбирает категории и теги
-                  |
-                  v
-       RecommendationService
-                  |
-        +4 совпала категория
-        +2 за совпавший тег
-        максимум 4 тега в score
-                  |
-                  v
-      ближайшие опубликованные события
+GET /api/security/csrf
 ```
 
-RTSC не использует скрытые персональные признаки для v0.9. Уже зарегистрированные мероприятия исключаются из рекомендаций, а на карточке рекомендации показывается причина подбора.
+затем передаёт `requestToken` в `X-CSRF-TOKEN` вместе с antiforgery cookie. Внешние MAX/Telegram/VK webhook защищаются собственными secret headers/payload secrets и не требуют browser CSRF token.
+
+## Health
+
+```text
+GET /health/live   процесс жив
+GET /health/ready  PostgreSQL доступен и приложение готово
+GET /health        alias readiness
+```
 
 ## CI
 
-Workflow `.github/workflows/ci.yml` выполняет:
+`.github/workflows/ci.yml` выполняет:
 
 ```text
-dotnet restore
-dotnet build -c Release
+dotnet restore RTSC-Core.slnx
+dotnet build RTSC-Core.slnx -c Release
+dotnet test
+dotnet package list --vulnerable --include-transitive
 ```
 
-Изменения проходят реальный .NET 10 build в Pull Request перед merge в `main`.
+NuGet audit предупреждения об известных уязвимостях считаются ошибками.
 
-## Следующая очередь разработки
+## Следующая очередь после v1.0
 
-1. перенос данных из RTSC-next;
-2. переход от bootstrap SQL к штатным EF Core migrations;
-3. production hardening: rate limiting, antiforgery strategy, security headers и тесты;
+1. production deployment на сервер и проверка smoke/health;
+2. перенос данных из RTSC-next;
+3. переход от bootstrap SQL к штатным EF Core migrations;
 4. управление каталогом тегов через Admin;
-5. дополнительные отчёты и экспорт.
+5. расширение автоматизированных integration/e2e tests.
