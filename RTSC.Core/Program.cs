@@ -15,6 +15,7 @@ using RTSC.Core.Features.Moderation;
 using RTSC.Core.Features.Notifications;
 using RTSC.Core.Features.Ratings;
 using RTSC.Core.Features.Reminders;
+using RTSC.Core.Features.Reports;
 using RTSC.Core.Integrations.Max;
 using RTSC.Core.Integrations.Telegram;
 using RTSC.Core.Integrations.Vk;
@@ -116,6 +117,7 @@ app.MapCommunityEndpoints();
 app.MapEventEndpoints();
 app.MapRatingEndpoints();
 app.MapCheckInEndpoints();
+app.MapReportEndpoints();
 app.MapMaxIntegrationEndpoints();
 app.MapTelegramIntegrationEndpoints();
 app.MapVkIntegrationEndpoints();
@@ -138,7 +140,7 @@ app.MapGet("/health", async (AppDbContext db, CancellationToken cancellationToke
 app.MapGet("/api/system/info", () => Results.Ok(new
 {
     service = "RTSC.Core",
-    version = "0.4.0",
+    version = "0.5.0",
     architecture = "modular-monolith",
     ui = "razor-pages",
     database = "postgresql",
