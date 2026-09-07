@@ -20,7 +20,7 @@ services:
       context: ./RTSC.Core
     restart: unless-stopped
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
       ConnectionStrings__Database: Host=db;Port=5432;Database=rtsc;Username=rtsc;Password=${POSTGRES_PASSWORD:-rtsc-dev-password}
       BootstrapAdmin__Email: ${BOOTSTRAP_ADMIN_EMAIL:-}
       BootstrapAdmin__Password: ${BOOTSTRAP_ADMIN_PASSWORD:-}
