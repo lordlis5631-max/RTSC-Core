@@ -17,7 +17,11 @@ else
         </div>
         @if (Model.CanManage)
         {
-            <div class="actions"><a class="button" href="/Communities/@Model.Item.Id/Edit">Редактировать</a><a class="button secondary" href="/Events/Create?communityId=@Model.Item.Id">Создать мероприятие</a></div>
+            <div class="actions">
+                <a class="button" href="/Communities/@Model.Item.Id/Edit">Редактировать</a>
+                @if (Model.CanManageMembers) { <a class="button secondary" href="/Communities/@Model.Item.Id/Members">Администраторы</a> }
+                <a class="button secondary" href="/Events/Create?communityId=@Model.Item.Id">Создать мероприятие</a>
+            </div>
         }
     </div>
     <section class="card prose"><p>@Model.Item.Description</p></section>
