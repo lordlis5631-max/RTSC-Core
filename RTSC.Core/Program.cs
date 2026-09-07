@@ -13,6 +13,7 @@ using RTSC.Core.Features.Events;
 using RTSC.Core.Features.ExternalAccounts;
 using RTSC.Core.Features.Moderation;
 using RTSC.Core.Features.Notifications;
+using RTSC.Core.Features.Personalization;
 using RTSC.Core.Features.Ratings;
 using RTSC.Core.Features.Reminders;
 using RTSC.Core.Features.Reports;
@@ -43,6 +44,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<AccessControlService>();
 builder.Services.AddScoped<ExternalLinkService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<RecommendationService>();
 builder.Services.AddSingleton<CommentModerationService>();
 builder.Services.AddSingleton<CheckInTokenService>();
 builder.Services.AddHostedService<BootstrapAdminService>();
@@ -140,11 +142,12 @@ app.MapGet("/health", async (AppDbContext db, CancellationToken cancellationToke
 app.MapGet("/api/system/info", () => Results.Ok(new
 {
     service = "RTSC.Core",
-    version = "0.8.0",
+    version = "0.9.0",
     architecture = "modular-monolith",
     ui = "razor-pages",
     database = "postgresql",
-    messaging = "outbox-style delivery queue"
+    messaging = "outbox-style delivery queue",
+    personalization = "explicit interests with transparent scoring"
 }));
 
 app.Run();
