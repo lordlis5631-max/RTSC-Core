@@ -15,6 +15,8 @@ public sealed class CreateModel(AppDbContext db, AccessControlService access) : 
     [BindProperty] public string Title { get; set; } = string.Empty;
     [BindProperty] public string? Description { get; set; }
     [BindProperty] public string? Place { get; set; }
+    [BindProperty] public double? Latitude { get; set; }
+    [BindProperty] public double? Longitude { get; set; }
     [BindProperty] public int? Capacity { get; set; }
     [BindProperty] public string StartAtLocal { get; set; } = DateTime.Now.AddDays(1).ToString("yyyy-MM-ddTHH:mm");
     [BindProperty] public string? EndAtLocal { get; set; }
@@ -37,17 +39,33 @@ public sealed class CreateModel(AppDbContext db, AccessControlService access) : 
         if (end is not null && end <= start) { Error = "Окончание должно быть позже начала."; return Page(); }
         if (Capacity is <= 0) { Error = "Лимит участников должен быть больше нуля."; return Page(); }
         if (regStart is not null && regEnd is not null && regEnd <= regStart) { Error = "Дата окончания регистрации должна быть позже даты начала."; return Page(); }
+        if (!ValidateCoordinates()) return Page();
 
         var evt = new Event
         {
             CommunityId = CommunityId.Value, Title = Title.Trim(), Description = Description?.Trim() ?? string.Empty,
-            StartAt = start, EndAt = end, Place = Place?.Trim() ?? string.Empty, Capacity = Capacity,
+            StartAt = start, EndAt = end, Place = Place?.Trim() ?? string.Empty, Latitude = Latitude, Longitude = Longitude, Capacity = Capacity,
             RegistrationStartAt = regStart, RegistrationEndAt = regEnd,
             ImageUrl = string.IsNullOrWhiteSpace(ImageUrl) ? null : ImageUrl.Trim(), Status = EventStatus.Draft
         };
         db.Events.Add(evt);
         await db.SaveChangesAsync();
         return RedirectToPage("/Events/Details", new { id = evt.Id });
+    }
+
+    private bool ValidateCoordinates()
+    {
+        if (Latitude.HasValue != Longitude.HasValue)
+        {
+            Error = "Укажите широту и долготу вместе либо оставьте оба поля пустыми.";
+            return false;
+        }
+        if (Latitude is < -90 or > 90 || Longitude is < -180 or > 180)
+        {
+            Error = "Проверьте координаты: широта от -90 до 90, долгота от -180 до 180.";
+            return false;
+        }
+        return true;
     }
 
     private async Task LoadCommunitiesAsync()
