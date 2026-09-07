@@ -1,0 +1,50 @@
+@page "/Events/Calendar"
+@model RTSC.Core.Pages.Events.CalendarModel
+@{
+    ViewData["Title"] = "Календарь мероприятий";
+}
+<div class="page-head">
+    <div>
+        <p class="eyebrow">Афиша</p>
+        <h1>Календарь мероприятий</h1>
+        <p class="muted">@Model.MonthTitle</p>
+    </div>
+    <div class="actions">
+        <a class="button secondary" href="/Events/Calendar@Model.PreviousQuery">← Предыдущий</a>
+        <a class="button secondary" href="/Events/Calendar">Текущий месяц</a>
+        <a class="button secondary" href="/Events/Calendar@Model.NextQuery">Следующий →</a>
+    </div>
+</div>
+
+<div class="calendar-weekdays" aria-hidden="true">
+    <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+</div>
+<div class="calendar-grid">
+    @for (var i = 0; i < Model.FirstDayOffset; i++)
+    {
+        <div class="calendar-day empty-day"></div>
+    }
+    @foreach (var day in Model.Days)
+    {
+        <section class="calendar-day">
+            <div class="calendar-day-number">@day.Day</div>
+            @if (day.Events.Count == 0)
+            {
+                <span class="calendar-no-events">—</span>
+            }
+            else
+            {
+                <div class="calendar-events">
+                    @foreach (var item in day.Events)
+                    {
+                        <a class="calendar-event" href="/Events/@item.Id">
+                            <strong>@item.StartAt.ToLocalTime().ToString("HH:mm") · @item.Title</strong>
+                            <span>@item.CommunityName</span>
+                            <span>@item.Place</span>
+                        </a>
+                    }
+                </div>
+            }
+        </section>
+    }
+</div>

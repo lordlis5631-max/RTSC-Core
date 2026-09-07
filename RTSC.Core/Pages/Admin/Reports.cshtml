@@ -1,0 +1,46 @@
+@page
+@model RTSC.Core.Pages.Admin.ReportsModel
+@{
+    ViewData["Title"] = "Отчётность";
+}
+<div class="page-head">
+    <div>
+        <p class="eyebrow">Администрирование</p>
+        <h1>Отчётность</h1>
+        <p class="muted">Сводные показатели по пользователям, мероприятиям и посещаемости.</p>
+    </div>
+</div>
+
+<div class="grid stats">
+    <article><strong>@Model.Users</strong><span>пользователей всего</span></article>
+    <article><strong>@Model.ActiveUsers</strong><span>активных пользователей</span></article>
+    <article><strong>@Model.Communities</strong><span>сообществ всего</span></article>
+    <article><strong>@Model.PublishedCommunities</strong><span>опубликованных сообществ</span></article>
+    <article><strong>@Model.Events</strong><span>мероприятий всего</span></article>
+    <article><strong>@Model.PublishedEvents</strong><span>опубликованных/завершённых</span></article>
+    <article><strong>@Model.Registrations</strong><span>активных регистраций</span></article>
+    <article><strong>@Model.AttendanceRate%</strong><span>посещаемость по решённым статусам</span></article>
+</div>
+
+<section class="section">
+    <h2>Популярные мероприятия</h2>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Мероприятие</th><th>Дата</th><th>Сообщество</th><th>Регистрации</th><th>Пришли</th><th>Не пришли</th><th>Посещаемость</th></tr></thead>
+            <tbody>
+            @foreach (var item in Model.TopEvents)
+            {
+                <tr>
+                    <td><a href="/Events/@item.Id">@item.Title</a></td>
+                    <td>@item.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@item.CommunityName</td>
+                    <td>@item.Registered</td>
+                    <td>@item.Attended</td>
+                    <td>@item.NoShow</td>
+                    <td>@item.AttendanceRate%</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>
