@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rtsc
+      POSTGRES_USER: rtsc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rtsc-dev-password}
+    volumes:
+      - rtsc-db:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rtsc -d rtsc"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: ./RTSC.Core
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Database: Host=db;Port=5432;Database=rtsc;Username=rtsc;Password=${POSTGRES_PASSWORD:-rtsc-dev-password}
+      BootstrapAdmin__Email: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BootstrapAdmin__Password: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BootstrapAdmin__DisplayName: ${BOOTSTRAP_ADMIN_NAME:-Super Admin}
+      DataProtection__KeysPath: /app/data-protection
+      Max__Token: ${MAX_BOT_TOKEN:-}
+      Max__WebhookSecret: ${MAX_WEBHOOK_SECRET:-}
+      Max__WebhookUrl: ${MAX_WEBHOOK_URL:-}
+      Max__BotUrl: ${MAX_BOT_URL:-}
+      Max__PublicBaseUrl: ${PUBLIC_BASE_URL:-}
+      Telegram__Token: ${TELEGRAM_BOT_TOKEN:-}
+      Telegram__WebhookSecret: ${TELEGRAM_WEBHOOK_SECRET:-}
+      Telegram__WebhookUrl: ${TELEGRAM_WEBHOOK_URL:-}
+      Telegram__BotUrl: ${TELEGRAM_BOT_URL:-}
+      Telegram__PublicBaseUrl: ${PUBLIC_BASE_URL:-}
+      Vk__Token: ${VK_BOT_TOKEN:-}
+      Vk__GroupId: ${VK_GROUP_ID:-}
+      Vk__ApiVersion: ${VK_API_VERSION:-5.199}
+      Vk__CallbackSecret: ${VK_CALLBACK_SECRET:-}
+      Vk__ConfirmationCode: ${VK_CONFIRMATION_CODE:-}
+      Vk__CallbackUrl: ${VK_CALLBACK_URL:-}
+      Vk__BotUrl: ${VK_BOT_URL:-}
+      Vk__PublicBaseUrl: ${PUBLIC_BASE_URL:-}
+    ports:
+      - "8080:8080"
+    volumes:
+      - rtsc-keys:/app/data-protection
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  rtsc-db:
+  rtsc-keys:

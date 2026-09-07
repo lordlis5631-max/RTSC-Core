@@ -1,0 +1,38 @@
+@page "/Events/{id:guid}"
+@model RTSC.Core.Pages.Events.DetailsModel
+@{
+    ViewData["Title"] = Model.Item?.Title ?? "Мероприятие";
+}
+@if (Model.Item is null)
+{
+    <div class="empty"><h1>Мероприятие не найдено</h1></div>
+}
+else
+{
+    <div class="page-head">
+        <div><p class="eyebrow">@Model.Item.CommunityName · @Model.Item.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p><h1>@Model.Item.Title</h1><div class="meta"><span class="badge">@Model.Item.Status</span><span>@Model.Item.Registered участников</span></div></div>
+        @if (Model.CanManage) { <div class="actions"><a class="button" href="/Events/@Model.Item.Id/Manage">Управление</a><a class="button secondary" href="/Events/@Model.Item.Id/Edit">Редактировать</a></div> }
+    </div>
+    <div class="detail-grid">
+        <section class="card prose"><h2>О мероприятии</h2><p>@Model.Item.Description</p></section>
+        <aside class="card"><h3>Когда и где</h3><p><strong>@Model.Item.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</strong></p><p>@Model.Item.Place</p>@if (Model.Item.Capacity is not null) { <p>Лимит: @Model.Item.Capacity</p> }</aside>
+    </div>
+    @if (User.Identity?.IsAuthenticated == true && (Model.Item.Status == "Published" || Model.Item.Status == "Completed"))
+    {
+        <section class="card action-card">
+        @if ((Model.ParticipantStatus is null || Model.ParticipantStatus == "Cancelled") && Model.Item.Status == "Published")
+        {
+            <form method="post" asp-page-handler="Register"><button class="button" type="submit">Зарегистрироваться</button></form>
+        }
+        else
+        {
+            <div><strong>Вы зарегистрированы</strong><p class="muted">Статус: @Model.ParticipantStatus</p></div>
+            <div class="actions"><a class="button" href="/Events/@Model.Item.Id/Ticket">Мой QR-билет</a>@if (Model.ParticipantStatus == "Attended" && Model.Item.Status == "Completed") { <a class="button secondary" href="/Events/@Model.Item.Id/Rate">Оценить исполнителей</a> }<form method="post" asp-page-handler="Cancel"><button class="button secondary" type="submit">Отменить регистрацию</button></form></div>
+        }
+        </section>
+    }
+    @if (Model.Performers.Count > 0)
+    {
+        <section class="section"><h2>Исполнители</h2><div class="cards">@foreach (var p in Model.Performers) { <a class="card link-card" href="/Ratings/Performer/@p.UserId"><h3>@p.Name</h3><p>@p.Role</p></a> }</div></section>
+    }
+}

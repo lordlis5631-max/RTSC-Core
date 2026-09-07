@@ -1,0 +1,7 @@
+@page
+@model RTSC.Core.Pages.Events.IndexModel
+@{
+    ViewData["Title"] = "Мероприятия";
+}
+<div class="page-head"><div><p class="eyebrow">Афиша</p><h1>Мероприятия</h1></div>@if (User.Identity?.IsAuthenticated == true) { <a class="button" href="/Events/Create">Создать мероприятие</a> }</div>
+<div class="cards">@foreach (var item in Model.Items) { <a class="card link-card" href="/Events/@item.Id"><p class="eyebrow">@item.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p><h3>@item.Title</h3><p>@item.Description</p><p><strong>@item.Place</strong></p><span class="badge">@item.CommunityName</span></a> } @if (Model.Items.Count == 0) { <p class="muted">Нет ближайших опубликованных мероприятий.</p> }</div>

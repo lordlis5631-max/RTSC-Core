@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - RTSC Core</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="/">RTSC Core</a>
+    <nav>
+        <a href="/Events">Мероприятия</a>
+        <a href="/Communities">Сообщества</a>
+        @if (User.Identity?.IsAuthenticated == true) { <a href="/Profile">Профиль</a> }
+        @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin")) { <a href="/Admin">Админ</a> }
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <span class="user-name">@User.Identity.Name</span>
+            <form method="post" action="/Logout"><button class="nav-button" type="submit">Выйти</button></form>
+        }
+        else
+        {
+            <a href="/Login">Войти</a><a href="/Register">Регистрация</a>
+        }
+    </nav>
+</header>
+<main class="container">@RenderBody()</main>
+</body>
+</html>

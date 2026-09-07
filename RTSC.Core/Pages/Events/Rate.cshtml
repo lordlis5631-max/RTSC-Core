@@ -1,0 +1,6 @@
+@page "/Events/{id:guid}/Rate"
+@model RTSC.Core.Pages.Events.RateModel
+@{ ViewData["Title"] = "Оценка исполнителей"; }
+<div class="page-head"><div><p class="eyebrow">После мероприятия</p><h1>Оцените исполнителей</h1><p>@Model.EventTitle</p></div><a class="button secondary" href="/Events/@Model.Id">Назад</a></div>
+@if (!string.IsNullOrWhiteSpace(Model.Message)) { <p class="notice">@Model.Message</p> }
+<div class="stack">@foreach (var p in Model.Performers) { <article class="card"><div class="page-head mini"><div><h2><a href="/Ratings/Performer/@p.UserId">@p.Name</a></h2><p class="muted">@p.Role</p></div>@if (p.CurrentScore is not null) { <span class="rating-chip">★ @p.CurrentScore/5</span> }</div><form method="post" asp-page-handler="Rate" class="rating-form"><input type="hidden" name="performerUserId" value="@p.UserId"/><label>Оценка<select name="score" required><option value="5">5 — отлично</option><option value="4">4 — хорошо</option><option value="3">3 — нормально</option><option value="2">2 — есть проблемы</option><option value="1">1 — плохо</option></select></label><label>Комментарий<textarea name="comment" rows="3" maxlength="4000">@p.CurrentComment</textarea></label><button class="button" type="submit">Сохранить оценку</button></form></article> }</div>

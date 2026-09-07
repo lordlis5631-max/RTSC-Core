@@ -1,0 +1,13 @@
+@page "/Communities/{id:guid}/Edit"
+@model RTSC.Core.Pages.Communities.EditModel
+@{
+    ViewData["Title"] = "Редактирование сообщества";
+}
+<h1>Редактирование сообщества</h1>
+@if (!string.IsNullOrWhiteSpace(Model.Error)) { <p class="error">@Model.Error</p> }
+<form method="post" class="form wide-form">
+    <label>Название<input asp-for="Name" maxlength="250" required /></label>
+    <label>Описание<textarea asp-for="Description" rows="8"></textarea></label>
+    <label>Ссылка на логотип<input asp-for="LogoUrl" type="url" /></label>
+    <div class="actions"><button class="button" type="submit">Сохранить</button><a class="button secondary" href="/Communities/@Model.Id">Назад</a></div>
+</form>
