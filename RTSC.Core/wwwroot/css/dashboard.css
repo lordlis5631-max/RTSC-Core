@@ -1,0 +1,17 @@
+.dashboard-head { align-items: center; }
+.dashboard-head h1 { margin-bottom: 12px; }
+.dashboard-stats { margin-bottom: 8px; }
+.dashboard-stats article { min-height: 118px; display: flex; flex-direction: column; justify-content: space-between; }
+.dashboard-stats strong { font-size: clamp(30px, 5vw, 46px); letter-spacing: -.04em; }
+.dashboard-cards { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.dashboard-event-card { display: flex; flex-direction: column; }
+.dashboard-event-card .actions { margin-top: auto; padding-top: 16px; }
+.empty-dashboard { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.dashboard-event-card h3 a:hover, .table-wrap td strong { text-decoration: none; }
+@media (max-width: 760px) {
+  .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-stats article { min-height: 104px; }
+}
+@media (max-width: 460px) {
+  .dashboard-stats { grid-template-columns: 1fr; }
+}
