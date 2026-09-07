@@ -10,6 +10,15 @@ Production cookie имеют `Secure` и `__Host-` prefix. Публичный т
 Internet -> HTTPS reverse proxy -> RTSC.Core:8080 -> PostgreSQL
 ```
 
+`compose.yml` по умолчанию использует `ASPNETCORE_ENVIRONMENT=Development`, чтобы локальный `http://localhost:8080` корректно работал в браузере. Для production обязательно задайте:
+
+```env
+ASPNETCORE_ENVIRONMENT=Production
+PUBLIC_BASE_URL=https://your-rtsc.example
+```
+
+Не включайте `Production` для прямого HTTP-доступа: production session/antiforgery cookies намеренно имеют флаг `Secure`.
+
 ## 2. Секреты
 
 Не храните реальные токены и пароли в git. До запуска задайте как минимум:
