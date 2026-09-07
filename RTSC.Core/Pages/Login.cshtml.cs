@@ -37,6 +37,6 @@ public sealed class LoginModel(AppDbContext db, IPasswordHasher<User> hasher) : 
             new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)),
             new AuthenticationProperties { IsPersistent = true });
 
-        return LocalRedirect("/");
+        return LocalRedirect("/My");
     }
 }

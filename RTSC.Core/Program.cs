@@ -140,7 +140,7 @@ app.MapGet("/health", async (AppDbContext db, CancellationToken cancellationToke
 app.MapGet("/api/system/info", () => Results.Ok(new
 {
     service = "RTSC.Core",
-    version = "0.7.0",
+    version = "0.8.0",
     architecture = "modular-monolith",
     ui = "razor-pages",
     database = "postgresql",

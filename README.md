@@ -1,6 +1,6 @@
 # RTSC-Core
 
-RTSC-Core — новый RTSC, переписанный с нуля как простой модульный монолит. Текущая версия: **0.7.0**.
+RTSC-Core — новый RTSC, переписанный с нуля как простой модульный монолит. Текущая версия: **0.8.0**.
 
 ## Архитектура
 
@@ -25,9 +25,23 @@ Razor Pages + API + Auth
 - глобальные роли `User / Admin / SuperAdmin`;
 - блокировка пользователей;
 - bootstrap `SuperAdmin`;
+- `/My` — рабочий личный кабинет пользователя;
+- после входа пользователь попадает сразу в `Мой RTSC`;
 - профиль пользователя;
 - `ExternalAccount` для MAX/Telegram/VK;
 - одноразовые безопасные коды привязки внешних аккаунтов.
+
+### Мой RTSC
+- ближайшие зарегистрированные мероприятия;
+- быстрый доступ к QR-билетам;
+- история участия;
+- статистика регистраций и посещений;
+- непрочитанные уведомления;
+- мероприятия, где пользователь назначен исполнителем;
+- сообщества, которыми пользователь управляет;
+- быстрые действия владельца/администратора сообщества;
+- ближайшие организаторские мероприятия;
+- переходы в управление и аналитику события.
 
 ### Сообщества
 - создание, редактирование и модерация;
@@ -90,6 +104,7 @@ Razor Pages + API + Auth
 ## Основные страницы
 
 ```text
+/My                             Мой RTSC
 /Events                         афиша + поиск и фильтры
 /Events/Calendar                календарь
 /Events/Map                     карта
@@ -97,7 +112,7 @@ Razor Pages + API + Auth
 /Events/{id}/Manage             управление
 /Events/{id}/Analytics          аналитика мероприятия
 /Communities                    сообщества
-/Profile                        профиль и внешние аккаунты
+/Profile                        профиль, мессенджеры и уведомления
 /Admin                          админ-панель
 /Admin/Reports                  общая отчётность
 /Admin/Notifications            очередь доставок
@@ -112,22 +127,13 @@ RTSC-Core/
 │   ├── Data/
 │   ├── Domain/
 │   ├── Features/
-│   │   ├── Access/
-│   │   ├── Auth/
-│   │   ├── CheckIn/
-│   │   ├── Communities/
-│   │   ├── Events/
-│   │   ├── ExternalAccounts/
-│   │   ├── Moderation/
-│   │   ├── Notifications/
-│   │   ├── Ratings/
-│   │   ├── Reminders/
-│   │   └── Reports/
 │   ├── Integrations/
-│   │   ├── Max/
-│   │   ├── Telegram/
-│   │   └── Vk/
 │   ├── Pages/
+│   │   ├── My/
+│   │   ├── Profile/
+│   │   ├── Events/
+│   │   ├── Communities/
+│   │   └── Admin/
 │   ├── Program.cs
 │   └── RTSC.Core.csproj
 ├── db/init/
@@ -172,6 +178,8 @@ psql "$CONNECTION_STRING" -f db/migrations/003_integrations_reminders.sql
 psql "$CONNECTION_STRING" -f db/migrations/004_event_location.sql
 ```
 
+Для `v0.8` отдельная миграция не нужна: `Мой RTSC` использует существующие сущности и не меняет схему PostgreSQL.
+
 Для свежей установки отдельные migration scripts не нужны: `db/init/001_initial.sql` содержит актуальную bootstrap schema.
 
 ## Как устроены уведомления
@@ -200,12 +208,12 @@ dotnet restore
 dotnet build -c Release
 ```
 
-Начиная с импорта проекта в GitHub, изменения проходят реальный .NET 10 build в Pull Request перед merge в `main`.
+Изменения проходят реальный .NET 10 build в Pull Request перед merge в `main`.
 
 ## Следующая очередь разработки
 
-1. перенос данных из RTSC-next;
-2. переход от bootstrap SQL к штатным EF Core migrations;
-3. категории/теги мероприятий и более точная персонализация афиши;
-4. дополнительные отчёты и экспорт;
-5. production hardening: rate limiting, antiforgery strategy для cookie-auth API, security headers и тесты.
+1. категории/теги мероприятий и персонализация афиши;
+2. перенос данных из RTSC-next;
+3. переход от bootstrap SQL к штатным EF Core migrations;
+4. production hardening: rate limiting, antiforgery strategy, security headers и тесты;
+5. дополнительные отчёты и экспорт.
