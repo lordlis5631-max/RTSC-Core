@@ -13,11 +13,23 @@
 
 <form method="get" class="card event-filters">
     <div class="filter-grid">
-        <label>Поиск<input asp-for="Q" placeholder="Название, описание, место или сообщество" /></label>
+        <label>Поиск<input asp-for="Q" placeholder="Название, описание, место, тег или сообщество" /></label>
         <label>Сообщество
             <select asp-for="CommunityId">
                 <option value="">Все сообщества</option>
                 @foreach (var community in Model.Communities) { <option value="@community.Id">@community.Name</option> }
+            </select>
+        </label>
+        <label>Категория
+            <select asp-for="Category">
+                <option value="">Все категории</option>
+                @foreach (var category in Model.Categories) { <option value="@category.Value">@category.Label</option> }
+            </select>
+        </label>
+        <label>Тег
+            <select asp-for="TagId">
+                <option value="">Все теги</option>
+                @foreach (var tag in Model.Tags) { <option value="@tag.Id">@tag.Name</option> }
             </select>
         </label>
         <label>Место<input asp-for="Place" placeholder="Например, Уфа" /></label>
@@ -37,7 +49,11 @@
         <h3>@item.Title</h3>
         <p>@item.Description</p>
         <p><strong>@item.Place</strong></p>
-        <div class="meta"><span class="badge">@item.CommunityName</span><span>@item.Registered участников@if (item.Capacity is not null) { <text> / @item.Capacity</text> }</span>@if (item.HasLocation) { <span>📍 На карте</span> }</div>
+        <div class="meta"><span class="badge">@item.Category</span><span class="badge">@item.CommunityName</span><span>@item.Registered участников@if (item.Capacity is not null) { <text> / @item.Capacity</text> }</span>@if (item.HasLocation) { <span>📍 На карте</span> }</div>
+        @if (item.Tags.Count > 0)
+        {
+            <div class="tag-list">@foreach (var tag in item.Tags) { <span class="tag-chip">#@tag</span> }</div>
+        }
     </a>
 }
 @if (Model.Items.Count == 0) { <p class="muted">По выбранным условиям мероприятий не найдено.</p> }
