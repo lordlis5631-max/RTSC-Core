@@ -16,6 +16,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Event> Events => Set<Event>();
     public DbSet<EventParticipant> EventParticipants => Set<EventParticipant>();
     public DbSet<EventPerformer> EventPerformers => Set<EventPerformer>();
+    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<EventTag> EventTags => Set<EventTag>();
+    public DbSet<UserTagInterest> UserTagInterests => Set<UserTagInterest>();
+    public DbSet<UserCategoryInterest> UserCategoryInterests => Set<UserCategoryInterest>();
     public DbSet<PerformerRating> PerformerRatings => Set<PerformerRating>();
     public DbSet<ParticipantRating> ParticipantRatings => Set<ParticipantRating>();
     public DbSet<Comment> Comments => Set<Comment>();
@@ -109,6 +113,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(x => x.ImageUrl).HasMaxLength(1000);
             entity.HasOne(x => x.Community).WithMany(x => x.Events).HasForeignKey(x => x.CommunityId).OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(x => new { x.Status, x.StartAt });
+            entity.HasIndex(x => new { x.Status, x.Category, x.StartAt });
             entity.HasIndex(x => new { x.Latitude, x.Longitude });
         });
 
@@ -127,6 +132,39 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             entity.Property(x => x.Role).HasMaxLength(100);
             entity.HasOne(x => x.Event).WithMany(x => x.Performers).HasForeignKey(x => x.EventId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.ToTable("tags");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(80);
+            entity.Property(x => x.Slug).HasMaxLength(80);
+            entity.HasIndex(x => x.Slug).IsUnique();
+            entity.HasIndex(x => x.IsActive);
+        });
+
+        modelBuilder.Entity<EventTag>(entity =>
+        {
+            entity.ToTable("event_tags");
+            entity.HasKey(x => new { x.EventId, x.TagId });
+            entity.HasOne(x => x.Event).WithMany(x => x.Tags).HasForeignKey(x => x.EventId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.Tag).WithMany(x => x.Events).HasForeignKey(x => x.TagId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserTagInterest>(entity =>
+        {
+            entity.ToTable("user_tag_interests");
+            entity.HasKey(x => new { x.UserId, x.TagId });
+            entity.HasOne(x => x.User).WithMany(x => x.TagInterests).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.Tag).WithMany(x => x.InterestedUsers).HasForeignKey(x => x.TagId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserCategoryInterest>(entity =>
+        {
+            entity.ToTable("user_category_interests");
+            entity.HasKey(x => new { x.UserId, x.Category });
+            entity.HasOne(x => x.User).WithMany(x => x.CategoryInterests).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<PerformerRating>(entity =>

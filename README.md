@@ -1,6 +1,6 @@
 # RTSC-Core
 
-RTSC-Core — новый RTSC, переписанный с нуля как простой модульный монолит. Текущая версия: **0.8.0**.
+RTSC-Core — новый RTSC, переписанный с нуля как простой модульный монолит. Текущая версия: **0.9.0**.
 
 ## Архитектура
 
@@ -31,7 +31,7 @@ Razor Pages + API + Auth
 - `ExternalAccount` для MAX/Telegram/VK;
 - одноразовые безопасные коды привязки внешних аккаунтов.
 
-### Мой RTSC
+### Мой RTSC и персонализация
 - ближайшие зарегистрированные мероприятия;
 - быстрый доступ к QR-билетам;
 - история участия;
@@ -41,7 +41,12 @@ Razor Pages + API + Auth
 - сообщества, которыми пользователь управляет;
 - быстрые действия владельца/администратора сообщества;
 - ближайшие организаторские мероприятия;
-- переходы в управление и аналитику события.
+- настройка интересов в `/My/Interests`;
+- явный выбор категорий и до 12 тегов интересов;
+- персональная подборка ближайших мероприятий;
+- прозрачный recommendation score: совпавшая категория + совпавшие теги;
+- объяснение причины каждой рекомендации;
+- уже зарегистрированные события не предлагаются повторно.
 
 ### Сообщества
 - создание, редактирование и модерация;
@@ -52,8 +57,11 @@ Razor Pages + API + Auth
 
 ### Мероприятия
 - создание, редактирование и модерация;
+- категория мероприятия;
+- до 8 тегов на мероприятие;
 - публичная афиша;
-- поиск и фильтры по тексту, сообществу, месту и датам;
+- поиск по названию, описанию, месту, сообществу и тегам;
+- фильтры по сообществу, категории, тегу, месту и датам;
 - публичный календарь;
 - публичная карта мероприятий;
 - необязательные координаты `Latitude / Longitude` с проверкой диапазонов;
@@ -104,7 +112,8 @@ Razor Pages + API + Auth
 ## Основные страницы
 
 ```text
-/My                             Мой RTSC
+/My                             Мой RTSC + рекомендации
+/My/Interests                   категории и теги интересов
 /Events                         афиша + поиск и фильтры
 /Events/Calendar                календарь
 /Events/Map                     карта
@@ -119,35 +128,12 @@ Razor Pages + API + Auth
 /Admin/Integrations             интеграции
 ```
 
-## Структура проекта
-
-```text
-RTSC-Core/
-├── RTSC.Core/
-│   ├── Data/
-│   ├── Domain/
-│   ├── Features/
-│   ├── Integrations/
-│   ├── Pages/
-│   │   ├── My/
-│   │   ├── Profile/
-│   │   ├── Events/
-│   │   ├── Communities/
-│   │   └── Admin/
-│   ├── Program.cs
-│   └── RTSC.Core.csproj
-├── db/init/
-├── db/migrations/
-├── docs/
-├── scripts/
-├── .github/workflows/ci.yml
-└── compose.yml
-```
-
 ## Запуск через Docker
 
 ```bash
 cp .env.example .env
+docker compose up -d --build
+./scripts/smoke.sh
 ```
 
 Минимальные переменные:
@@ -159,45 +145,40 @@ BOOTSTRAP_ADMIN_PASSWORD=strong-password
 BOOTSTRAP_ADMIN_NAME=Super Admin
 ```
 
-Запуск:
-
-```bash
-docker compose up -d --build
-./scripts/smoke.sh
-```
-
 По умолчанию приложение доступно на `http://localhost:8080`.
 
 ## Обновление существующей базы
 
-Последовательно применяйте upgrade scripts, если база создана на более раннем snapshot:
+Для базы, созданной на ранних snapshot, scripts применяются последовательно:
 
 ```bash
 psql "$CONNECTION_STRING" -f db/migrations/002_messaging.sql
 psql "$CONNECTION_STRING" -f db/migrations/003_integrations_reminders.sql
 psql "$CONNECTION_STRING" -f db/migrations/004_event_location.sql
+psql "$CONNECTION_STRING" -f db/migrations/005_personalization.sql
 ```
 
-Для `v0.8` отдельная миграция не нужна: `Мой RTSC` использует существующие сущности и не меняет схему PostgreSQL.
+`005_personalization.sql` добавляет категорию события, каталог тегов, связи `event_tags`, а также явные интересы пользователя `user_tag_interests` и `user_category_interests`. Скрипт также создаёт базовый каталог тегов.
 
-Для свежей установки отдельные migration scripts не нужны: `db/init/001_initial.sql` содержит актуальную bootstrap schema.
+Для свежей установки отдельные migration scripts не нужны: `db/init/001_initial.sql` содержит актуальную bootstrap schema v0.9.
 
-## Как устроены уведомления
+## Как работают рекомендации
 
 ```text
-Business action
-     |
-     v
- Notification  ----------> Web profile history
-     |
-     +--> NotificationDelivery(MAX) --> dispatcher --> MAX API
-     |
-     +--> NotificationDelivery(VK)  --> dispatcher --> VK API
-     |
-     +--> NotificationDelivery(TG)  --> dispatcher --> Telegram Bot API
+Пользователь сам выбирает категории и теги
+                  |
+                  v
+       RecommendationService
+                  |
+        +4 совпала категория
+        +2 за совпавший тег
+        максимум 4 тега в score
+                  |
+                  v
+      ближайшие опубликованные события
 ```
 
-Бизнес-операция не делает сетевой вызов в мессенджер напрямую. Она сохраняет уведомление и delivery в PostgreSQL, а фоновый worker выполняет доставку с retry. Недоступность MAX/VK/Telegram не должна ломать регистрацию, check-in или модерацию.
+RTSC не использует скрытые персональные признаки для v0.9. Уже зарегистрированные мероприятия исключаются из рекомендаций, а на карточке рекомендации показывается причина подбора.
 
 ## CI
 
@@ -212,8 +193,8 @@ dotnet build -c Release
 
 ## Следующая очередь разработки
 
-1. категории/теги мероприятий и персонализация афиши;
-2. перенос данных из RTSC-next;
-3. переход от bootstrap SQL к штатным EF Core migrations;
-4. production hardening: rate limiting, antiforgery strategy, security headers и тесты;
+1. перенос данных из RTSC-next;
+2. переход от bootstrap SQL к штатным EF Core migrations;
+3. production hardening: rate limiting, antiforgery strategy, security headers и тесты;
+4. управление каталогом тегов через Admin;
 5. дополнительные отчёты и экспорт.

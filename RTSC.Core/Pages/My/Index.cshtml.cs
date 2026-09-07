@@ -5,14 +5,17 @@ using Microsoft.EntityFrameworkCore;
 using RTSC.Core.Data;
 using RTSC.Core.Domain;
 using RTSC.Core.Features.Access;
+using RTSC.Core.Features.Personalization;
 
 namespace RTSC.Core.Pages.My;
 
 [Authorize]
-public sealed class IndexModel(AppDbContext db) : PageModel
+public sealed class IndexModel(AppDbContext db, RecommendationService recommendationService) : PageModel
 {
     public string DisplayName { get; private set; } = string.Empty;
     public DashboardStats Stats { get; private set; } = new(0, 0, 0, 0, 0, 0);
+    public bool HasInterests { get; private set; }
+    public IReadOnlyList<RecommendationVm> Recommendations { get; private set; } = [];
     public IReadOnlyList<ParticipationVm> Upcoming { get; private set; } = [];
     public IReadOnlyList<ParticipationVm> Past { get; private set; } = [];
     public IReadOnlyList<PerformerVm> PerformerAssignments { get; private set; } = [];
@@ -30,6 +33,25 @@ public sealed class IndexModel(AppDbContext db) : PageModel
             .Where(x => x.Id == userId.Value)
             .Select(x => x.DisplayName)
             .SingleOrDefaultAsync() ?? User.Identity?.Name ?? "Пользователь";
+
+        HasInterests = await db.UserCategoryInterests.AsNoTracking().AnyAsync(x => x.UserId == userId.Value)
+            || await db.UserTagInterests.AsNoTracking().AnyAsync(x => x.UserId == userId.Value);
+
+        if (HasInterests)
+        {
+            Recommendations = (await recommendationService.GetForUserAsync(userId.Value, 8))
+                .Select(x => new RecommendationVm(
+                    x.EventId,
+                    x.Title,
+                    x.CommunityName,
+                    x.StartAt,
+                    x.Place,
+                    EventCategoryCatalog.Label(x.Category),
+                    x.Capacity,
+                    x.Registered,
+                    x.Reason))
+                .ToList();
+        }
 
         var participationQuery = db.EventParticipants.AsNoTracking()
             .Where(x => x.UserId == userId.Value && x.Status != ParticipantStatus.Cancelled);
@@ -129,6 +151,7 @@ public sealed class IndexModel(AppDbContext db) : PageModel
     }
 
     public sealed record DashboardStats(int Upcoming, int Registrations, int Attended, int ManagedCommunities, int PerformerAssignments, int UnreadNotifications);
+    public sealed record RecommendationVm(Guid EventId, string Title, string CommunityName, DateTimeOffset StartAt, string Place, string Category, int? Capacity, int Registered, string Reason);
     public sealed record ParticipationVm(Guid EventId, string Title, string CommunityName, DateTimeOffset StartAt, string Place, string Status, double? Latitude, double? Longitude);
     public sealed record PerformerVm(Guid EventId, string Title, DateTimeOffset StartAt, string Place, string Role, string CommunityName);
     public sealed record CommunityVm(Guid Id, string Name, string Role, string Status, int EventCount, int MemberCount);

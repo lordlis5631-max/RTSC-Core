@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RTSC.Core.Data;
 using RTSC.Core.Domain;
 using RTSC.Core.Features.Access;
+using RTSC.Core.Features.Personalization;
 
 namespace RTSC.Core.Pages.Events;
 
@@ -14,6 +15,8 @@ public sealed class CreateModel(AppDbContext db, AccessControlService access) : 
     [BindProperty(SupportsGet = true)] public Guid? CommunityId { get; set; }
     [BindProperty] public string Title { get; set; } = string.Empty;
     [BindProperty] public string? Description { get; set; }
+    [BindProperty] public EventCategory Category { get; set; } = EventCategory.Other;
+    [BindProperty] public List<Guid> SelectedTagIds { get; set; } = [];
     [BindProperty] public string? Place { get; set; }
     [BindProperty] public double? Latitude { get; set; }
     [BindProperty] public double? Longitude { get; set; }
@@ -25,14 +28,23 @@ public sealed class CreateModel(AppDbContext db, AccessControlService access) : 
     [BindProperty] public string? ImageUrl { get; set; }
     public string? Error { get; private set; }
     public IReadOnlyList<CommunityVm> Communities { get; private set; } = [];
+    public IReadOnlyList<CategoryVm> Categories { get; private set; } = [];
+    public IReadOnlyList<TagVm> Tags { get; private set; } = [];
 
-    public async Task OnGetAsync() => await LoadCommunitiesAsync();
+    public async Task OnGetAsync() => await LoadOptionsAsync();
 
     public async Task<IActionResult> OnPostAsync()
     {
-        await LoadCommunitiesAsync();
+        await LoadOptionsAsync();
         if (CommunityId is null || !await access.CanManageCommunityAsync(CommunityId.Value, User)) return Forbid();
         if (string.IsNullOrWhiteSpace(Title) || !TryLocal(StartAtLocal, out var start)) { Error = "Заполните название и дату начала."; return Page(); }
+        if (!Enum.IsDefined(Category)) { Error = "Выберите корректную категорию."; return Page(); }
+
+        SelectedTagIds = SelectedTagIds.Distinct().ToList();
+        if (SelectedTagIds.Count > 8) { Error = "Для мероприятия можно выбрать не более 8 тегов."; return Page(); }
+        var validTagIds = await ValidateTagsAsync();
+        if (validTagIds is null) return Page();
+
         DateTimeOffset? end = TryLocal(EndAtLocal, out var parsedEnd) ? parsedEnd : null;
         DateTimeOffset? regStart = TryLocal(RegistrationStartLocal, out var parsedRegStart) ? parsedRegStart : null;
         DateTimeOffset? regEnd = TryLocal(RegistrationEndLocal, out var parsedRegEnd) ? parsedRegEnd : null;
@@ -43,14 +55,40 @@ public sealed class CreateModel(AppDbContext db, AccessControlService access) : 
 
         var evt = new Event
         {
-            CommunityId = CommunityId.Value, Title = Title.Trim(), Description = Description?.Trim() ?? string.Empty,
-            StartAt = start, EndAt = end, Place = Place?.Trim() ?? string.Empty, Latitude = Latitude, Longitude = Longitude, Capacity = Capacity,
-            RegistrationStartAt = regStart, RegistrationEndAt = regEnd,
-            ImageUrl = string.IsNullOrWhiteSpace(ImageUrl) ? null : ImageUrl.Trim(), Status = EventStatus.Draft
+            CommunityId = CommunityId.Value,
+            Title = Title.Trim(),
+            Description = Description?.Trim() ?? string.Empty,
+            Category = Category,
+            StartAt = start,
+            EndAt = end,
+            Place = Place?.Trim() ?? string.Empty,
+            Latitude = Latitude,
+            Longitude = Longitude,
+            Capacity = Capacity,
+            RegistrationStartAt = regStart,
+            RegistrationEndAt = regEnd,
+            ImageUrl = string.IsNullOrWhiteSpace(ImageUrl) ? null : ImageUrl.Trim(),
+            Status = EventStatus.Draft
         };
+
         db.Events.Add(evt);
+        foreach (var tagId in validTagIds)
+            evt.Tags.Add(new EventTag { TagId = tagId });
+
         await db.SaveChangesAsync();
         return RedirectToPage("/Events/Details", new { id = evt.Id });
+    }
+
+    private async Task<List<Guid>?> ValidateTagsAsync()
+    {
+        if (SelectedTagIds.Count == 0) return [];
+        var valid = await db.Tags.AsNoTracking()
+            .Where(x => x.IsActive && SelectedTagIds.Contains(x.Id))
+            .Select(x => x.Id)
+            .ToListAsync();
+        if (valid.Count == SelectedTagIds.Count) return valid;
+        Error = "Один из выбранных тегов недоступен.";
+        return null;
     }
 
     private bool ValidateCoordinates()
@@ -68,7 +106,7 @@ public sealed class CreateModel(AppDbContext db, AccessControlService access) : 
         return true;
     }
 
-    private async Task LoadCommunitiesAsync()
+    private async Task LoadOptionsAsync()
     {
         if (AccessControlService.IsGlobalAdmin(User))
         {
@@ -81,7 +119,17 @@ public sealed class CreateModel(AppDbContext db, AccessControlService access) : 
                 .Where(x => x.UserId == userId.Value && (x.Role == CommunityMemberRole.Owner || x.Role == CommunityMemberRole.Admin))
                 .OrderBy(x => x.Community.Name).Select(x => new CommunityVm(x.CommunityId, x.Community.Name)).ToListAsync();
         }
+
         if (CommunityId is null && Communities.Count > 0) CommunityId = Communities[0].Id;
+
+        Categories = EventCategoryCatalog.All
+            .Select(x => new CategoryVm(x, EventCategoryCatalog.Label(x)))
+            .ToList();
+        Tags = await db.Tags.AsNoTracking()
+            .Where(x => x.IsActive)
+            .OrderBy(x => x.Name)
+            .Select(x => new TagVm(x.Id, x.Name))
+            .ToListAsync();
     }
 
     private static bool TryLocal(string? value, out DateTimeOffset result)
@@ -93,4 +141,6 @@ public sealed class CreateModel(AppDbContext db, AccessControlService access) : 
     }
 
     public sealed record CommunityVm(Guid Id, string Name);
+    public sealed record CategoryVm(EventCategory Value, string Label);
+    public sealed record TagVm(Guid Id, string Name);
 }

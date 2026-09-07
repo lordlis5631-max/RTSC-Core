@@ -10,7 +10,15 @@
 else
 {
     <div class="page-head">
-        <div><p class="eyebrow">@Model.Item.CommunityName · @Model.Item.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p><h1>@Model.Item.Title</h1><div class="meta"><span class="badge">@Model.Item.Status</span><span>@Model.Item.Registered участников</span></div></div>
+        <div>
+            <p class="eyebrow">@Model.Item.CommunityName · @Model.Item.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+            <h1>@Model.Item.Title</h1>
+            <div class="meta"><span class="badge">@Model.Item.Category</span><span class="badge">@Model.Item.Status</span><span>@Model.Item.Registered участников</span></div>
+            @if (Model.Tags.Count > 0)
+            {
+                <div class="tag-list">@foreach (var tag in Model.Tags) { <span class="tag-chip">#@tag</span> }</div>
+            }
+        </div>
         @if (Model.CanManage) { <div class="actions"><a class="button" href="/Events/@Model.Item.Id/Manage">Управление</a><a class="button secondary" href="/Events/@Model.Item.Id/Edit">Редактировать</a></div> }
     </div>
     <div class="detail-grid">

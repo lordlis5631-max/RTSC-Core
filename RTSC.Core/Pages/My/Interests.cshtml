@@ -1,0 +1,52 @@
+@page "/My/Interests"
+@model RTSC.Core.Pages.My.InterestsModel
+@{
+    ViewData["Title"] = "Мои интересы";
+}
+
+<div class="page-head">
+    <div>
+        <p class="eyebrow">Персонализация</p>
+        <h1>Мои интересы</h1>
+        <p class="muted">Выберите темы, которые вам действительно интересны. RTSC использует только этот выбор для персональных рекомендаций.</p>
+    </div>
+    <a class="button secondary" href="/My">Назад в Мой RTSC</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message)) { <p class="notice">@Model.Message</p> }
+@if (!string.IsNullOrWhiteSpace(Model.Error)) { <p class="error">@Model.Error</p> }
+
+<form method="post" class="form wide-form">
+    <section class="section card">
+        <h2>Категории</h2>
+        <p class="muted">Категория — главный сигнал рекомендации.</p>
+        <div class="choice-grid">
+            @foreach (var category in Model.Categories)
+            {
+                <label class="choice-card">
+                    <input type="checkbox" name="SelectedCategories" value="@category.Value" checked="@Model.SelectedCategories.Contains(category.Value)" />
+                    <span>@category.Label</span>
+                </label>
+            }
+        </div>
+    </section>
+
+    <section class="section card">
+        <h2>Теги</h2>
+        <p class="muted">Можно выбрать до 12 более точных тем.</p>
+        <div class="choice-grid tags-grid">
+            @foreach (var tag in Model.Tags)
+            {
+                <label class="choice-card compact-choice">
+                    <input type="checkbox" name="SelectedTagIds" value="@tag.Id" checked="@Model.SelectedTagIds.Contains(tag.Id)" />
+                    <span>@tag.Name</span>
+                </label>
+            }
+        </div>
+    </section>
+
+    <div class="actions">
+        <button class="button" type="submit">Сохранить интересы</button>
+        <a class="button secondary" href="/My">Отмена</a>
+    </div>
+</form>

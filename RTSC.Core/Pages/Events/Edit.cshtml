@@ -8,6 +8,20 @@
 <form method="post" class="form wide-form">
     <label>Название<input asp-for="Title" maxlength="300" required /></label>
     <label>Описание<textarea asp-for="Description" rows="8"></textarea></label>
+    <label>Категория<select asp-for="Category">@foreach (var category in Model.Categories) { <option value="@category.Value">@category.Label</option> }</select></label>
+    <fieldset class="tag-fieldset">
+        <legend>Теги</legend>
+        <p class="muted">До 8 тегов. Они используются в поиске и персональных рекомендациях.</p>
+        <div class="choice-grid tags-grid">
+            @foreach (var tag in Model.Tags)
+            {
+                <label class="choice-card compact-choice">
+                    <input type="checkbox" name="SelectedTagIds" value="@tag.Id" checked="@Model.SelectedTagIds.Contains(tag.Id)" />
+                    <span>@tag.Name</span>
+                </label>
+            }
+        </div>
+    </fieldset>
     <div class="form-grid"><label>Начало<input asp-for="StartAtLocal" type="datetime-local" required /></label><label>Окончание<input asp-for="EndAtLocal" type="datetime-local" /></label></div>
     <label>Место<input asp-for="Place" maxlength="500" /></label>
     <div class="form-grid">

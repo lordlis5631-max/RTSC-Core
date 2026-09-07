@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/css/calendar.css" />
     <link rel="stylesheet" href="~/css/events-discovery.css" />
     <link rel="stylesheet" href="~/css/dashboard.css" />
+    <link rel="stylesheet" href="~/css/personalization.css" />
 </head>
 <body>
 <header class="topbar">
@@ -20,6 +21,7 @@
         @if (User.Identity?.IsAuthenticated == true)
         {
             <a href="/My">Мой RTSC</a>
+            <a href="/My/Interests">Интересы</a>
             <a href="/Profile">Профиль</a>
         }
         @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin")) { <a href="/Admin">Админ</a> }
