@@ -11,11 +11,13 @@ public sealed class DetailsModel(AppDbContext db, AccessControlService access) :
 {
     public ItemVm? Item { get; private set; }
     public bool CanManage { get; private set; }
+    public bool CanManageMembers { get; private set; }
     public IReadOnlyList<EventVm> Events { get; private set; } = [];
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         CanManage = await access.CanManageCommunityAsync(id, User);
+        CanManageMembers = await access.CanManageCommunityMembersAsync(id, User);
         Item = await db.Communities.AsNoTracking().Where(x => x.Id == id)
             .Select(x => new ItemVm(x.Id, x.Name, x.Description, x.Status.ToString(), x.Members.Count))
             .SingleOrDefaultAsync();
