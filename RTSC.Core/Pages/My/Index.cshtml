@@ -12,6 +12,7 @@
     </div>
     <div class="actions">
         <a class="button" href="/Events">Найти мероприятие</a>
+        <a class="button secondary" href="/My/Interests">Мои интересы</a>
         <a class="button secondary" href="/Profile">Профиль и уведомления</a>
     </div>
 </div>
@@ -24,6 +25,42 @@
     <article><strong>@Model.Stats.PerformerAssignments</strong><span>назначений исполнителем</span></article>
     <article><strong>@Model.Stats.UnreadNotifications</strong><span>непрочитанных уведомлений</span></article>
 </div>
+
+<section class="section recommendation-section">
+    <div class="page-head mini">
+        <div><h2>Рекомендуем вам</h2><p class="muted">Подборка строится только по выбранным вами категориям и тегам.</p></div>
+        <a class="link-button" href="/My/Interests">Настроить интересы</a>
+    </div>
+    @if (!Model.HasInterests)
+    {
+        <div class="card empty-dashboard">
+            <h3>Расскажите, что вам интересно</h3>
+            <p>Выберите категории и теги — после этого здесь появится персональная подборка мероприятий.</p>
+            <a class="button" href="/My/Interests">Выбрать интересы</a>
+        </div>
+    }
+    else if (Model.Recommendations.Count == 0)
+    {
+        <div class="card empty-dashboard"><p>Сейчас нет новых опубликованных мероприятий, совпадающих с вашими интересами.</p><a class="button secondary" href="/Events">Открыть всю афишу</a></div>
+    }
+    else
+    {
+        <div class="cards dashboard-cards recommendation-cards">
+        @foreach (var item in Model.Recommendations)
+        {
+            <article class="card recommendation-card">
+                <p class="eyebrow">@item.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+                <h3><a href="/Events/@item.EventId">@item.Title</a></h3>
+                <p class="muted">@item.CommunityName</p>
+                <p>@item.Place</p>
+                <div class="meta"><span class="badge">@item.Category</span><span>@item.Registered@(item.Capacity is not null ? $" / {item.Capacity}" : "") зарегистрировано</span></div>
+                <p class="recommendation-reason">Почему рекомендуем: @item.Reason</p>
+                <a class="button secondary" href="/Events/@item.EventId">Подробнее</a>
+            </article>
+        }
+        </div>
+    }
+</section>
 
 <section class="section">
     <div class="page-head mini">
