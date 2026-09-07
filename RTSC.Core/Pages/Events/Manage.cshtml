@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Управление мероприятием";
 }
-<div class="page-head"><div><p class="eyebrow">Управление</p><h1>@Model.Title</h1><span class="badge">@Model.Status</span></div><div class="actions"><a class="button secondary" href="/Events/@Model.Id">Карточка мероприятия</a></div></div>
+<div class="page-head"><div><p class="eyebrow">Управление</p><h1>@Model.Title</h1><span class="badge">@Model.Status</span></div><div class="actions"><a class="button secondary" href="/Events/@Model.Id">Карточка мероприятия</a><a class="button secondary" href="/api/events/@Model.Id/participants.csv">Экспорт участников CSV</a></div></div>
 @if (!string.IsNullOrWhiteSpace(Model.Message)) { <p class="notice">@Model.Message</p> }
 @if (Model.Status == "Draft") { <form method="post" asp-page-handler="Submit" class="inline-form"><button class="button" type="submit">Отправить на модерацию</button></form> }
 @if (Model.Status == "Published") { <form method="post" asp-page-handler="Complete" class="inline-form"><button class="button" type="submit">Завершить мероприятие</button></form> }
