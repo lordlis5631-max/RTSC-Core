@@ -9,6 +9,8 @@ public sealed class Event
     public DateTimeOffset StartAt { get; set; }
     public DateTimeOffset? EndAt { get; set; }
     public string Place { get; set; } = string.Empty;
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
     public int? Capacity { get; set; }
     public EventStatus Status { get; set; } = EventStatus.Draft;
     public DateTimeOffset? RegistrationStartAt { get; set; }

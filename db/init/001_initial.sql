@@ -94,14 +94,20 @@ CREATE TABLE IF NOT EXISTS events (
     "StartAt" timestamptz NOT NULL,
     "EndAt" timestamptz,
     "Place" varchar(500) NOT NULL,
+    "Latitude" double precision,
+    "Longitude" double precision,
     "Capacity" integer,
     "Status" integer NOT NULL DEFAULT 1,
     "RegistrationStartAt" timestamptz,
     "RegistrationEndAt" timestamptz,
     "ImageUrl" varchar(1000),
-    "CreatedAt" timestamptz NOT NULL
+    "CreatedAt" timestamptz NOT NULL,
+    CONSTRAINT ck_events_latitude CHECK ("Latitude" IS NULL OR "Latitude" BETWEEN -90 AND 90),
+    CONSTRAINT ck_events_longitude CHECK ("Longitude" IS NULL OR "Longitude" BETWEEN -180 AND 180),
+    CONSTRAINT ck_events_coordinate_pair CHECK (("Latitude" IS NULL) = ("Longitude" IS NULL))
 );
 CREATE INDEX IF NOT EXISTS ix_events_status_start ON events("Status", "StartAt");
+CREATE INDEX IF NOT EXISTS ix_events_coordinates ON events("Latitude", "Longitude");
 
 CREATE TABLE IF NOT EXISTS event_participants (
     "EventId" uuid NOT NULL REFERENCES events("Id") ON DELETE CASCADE,

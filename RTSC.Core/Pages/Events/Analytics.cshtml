@@ -1,0 +1,75 @@
+@page "/Events/{id:guid}/Analytics"
+@model RTSC.Core.Pages.Events.AnalyticsModel
+@{
+    ViewData["Title"] = "Аналитика мероприятия";
+}
+@if (Model.Event is null)
+{
+    <div class="empty"><h1>Мероприятие не найдено</h1></div>
+}
+else
+{
+    <div class="page-head">
+        <div>
+            <p class="eyebrow">Аналитика мероприятия</p>
+            <h1>@Model.Event.Title</h1>
+            <div class="meta"><span>@Model.Event.StartAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span><span class="badge">@Model.Event.Status</span></div>
+        </div>
+        <div class="actions"><a class="button secondary" href="/Events/@Model.Event.Id/Manage">Управление</a><a class="button secondary" href="/api/events/@Model.Event.Id/participants.csv">CSV участников</a></div>
+    </div>
+
+    <section class="grid stats analytics-stats">
+        <article><strong>@Model.ActiveParticipants</strong><span>активных участников</span></article>
+        <article><strong>@Model.Attended</strong><span>пришли</span></article>
+        <article><strong>@Model.NoShow</strong><span>не пришли</span></article>
+        <article><strong>@Model.Cancelled</strong><span>отменили участие</span></article>
+        <article><strong>@Model.ConfirmationRate.ToString("0.0")%</strong><span>подтверждение участия</span></article>
+        <article><strong>@Model.AttendanceRate.ToString("0.0")%</strong><span>явка</span></article>
+        <article><strong>@Model.CancellationRate.ToString("0.0")%</strong><span>отмены</span></article>
+        <article><strong>@(Model.CapacityUse?.ToString("0.0") ?? "—")@(Model.CapacityUse is not null ? "%" : "")</strong><span>заполнение лимита</span></article>
+    </section>
+
+    <section class="section">
+        <h2>Воронка участия</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Статус</th><th>Количество</th></tr></thead>
+                <tbody>
+                    <tr><td>Всего записей регистрации</td><td>@Model.TotalRecords</td></tr>
+                    <tr><td>Зарегистрированы</td><td>@Model.Registered</td></tr>
+                    <tr><td>Подтверждены</td><td>@Model.Confirmed</td></tr>
+                    <tr><td>Пришли</td><td>@Model.Attended</td></tr>
+                    <tr><td>Не пришли</td><td>@Model.NoShow</td></tr>
+                    <tr><td>Отменили</td><td>@Model.Cancelled</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Оценки</h2>
+        <div class="grid stats">
+            <article><strong>@(Model.PerformerRatingAverage?.ToString("0.00") ?? "—")</strong><span>средняя оценка исполнителей · @Model.PerformerRatingCount оценок</span></article>
+            <article><strong>@(Model.ParticipantRatingAverage?.ToString("0.00") ?? "—")</strong><span>средняя оценка участников · @Model.ParticipantRatingCount оценок</span></article>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Регистрации по дням</h2>
+        @if (Model.RegistrationsByDay.Count == 0)
+        {
+            <p class="muted">Регистраций пока нет.</p>
+        }
+        else
+        {
+            <div class="registration-bars">
+                @{ var max = Model.RegistrationsByDay.Max(x => x.Count); }
+                @foreach (var day in Model.RegistrationsByDay)
+                {
+                    var width = max > 0 ? Math.Max(4, day.Count * 100 / max) : 0;
+                    <div class="registration-row"><span>@day.Date.ToString("dd.MM")</span><div class="registration-track"><div class="registration-fill" style="width:@width%"></div></div><strong>@day.Count</strong></div>
+                }
+            </div>
+        }
+    </section>
+}

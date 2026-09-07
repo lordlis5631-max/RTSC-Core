@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - RTSC Core</title>
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="~/css/calendar.css" />
+    <link rel="stylesheet" href="~/css/events-discovery.css" />
 </head>
 <body>
 <header class="topbar">
@@ -13,6 +14,7 @@
     <nav>
         <a href="/Events">Мероприятия</a>
         <a href="/Events/Calendar">Календарь</a>
+        <a href="/Events/Map">Карта</a>
         <a href="/Communities">Сообщества</a>
         @if (User.Identity?.IsAuthenticated == true) { <a href="/Profile">Профиль</a> }
         @if (User.IsInRole("Admin") || User.IsInRole("SuperAdmin")) { <a href="/Admin">Админ</a> }

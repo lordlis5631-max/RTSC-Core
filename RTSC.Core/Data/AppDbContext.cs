@@ -97,13 +97,19 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
         modelBuilder.Entity<Event>(entity =>
         {
-            entity.ToTable("events");
+            entity.ToTable("events", table =>
+            {
+                table.HasCheckConstraint("ck_events_latitude", "\"Latitude\" IS NULL OR (\"Latitude\" BETWEEN -90 AND 90)");
+                table.HasCheckConstraint("ck_events_longitude", "\"Longitude\" IS NULL OR (\"Longitude\" BETWEEN -180 AND 180)");
+                table.HasCheckConstraint("ck_events_coordinate_pair", "(\"Latitude\" IS NULL) = (\"Longitude\" IS NULL)");
+            });
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Title).HasMaxLength(300);
             entity.Property(x => x.Place).HasMaxLength(500);
             entity.Property(x => x.ImageUrl).HasMaxLength(1000);
             entity.HasOne(x => x.Community).WithMany(x => x.Events).HasForeignKey(x => x.CommunityId).OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(x => new { x.Status, x.StartAt });
+            entity.HasIndex(x => new { x.Latitude, x.Longitude });
         });
 
         modelBuilder.Entity<EventParticipant>(entity =>

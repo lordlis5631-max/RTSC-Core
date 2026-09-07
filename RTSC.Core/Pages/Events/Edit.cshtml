@@ -10,6 +10,11 @@
     <label>Описание<textarea asp-for="Description" rows="8"></textarea></label>
     <div class="form-grid"><label>Начало<input asp-for="StartAtLocal" type="datetime-local" required /></label><label>Окончание<input asp-for="EndAtLocal" type="datetime-local" /></label></div>
     <label>Место<input asp-for="Place" maxlength="500" /></label>
+    <div class="form-grid">
+        <label>Широта<input asp-for="Latitude" type="number" min="-90" max="90" step="0.000001" /></label>
+        <label>Долгота<input asp-for="Longitude" type="number" min="-180" max="180" step="0.000001" /></label>
+    </div>
+    <p class="muted">Заполните обе координаты, чтобы мероприятие отображалось на карте.</p>
     <label>Лимит участников<input asp-for="Capacity" type="number" min="1" /></label>
     <div class="form-grid"><label>Регистрация с<input asp-for="RegistrationStartLocal" type="datetime-local" /></label><label>Регистрация до<input asp-for="RegistrationEndLocal" type="datetime-local" /></label></div>
     <label>Ссылка на изображение<input asp-for="ImageUrl" type="url" /></label>
