@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: rtsc
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rtsc-dev-password}
     volumes:
-      - rtsc-db:/var/lib/postgresql/data
+      - rtsc-db:/var/lib/postgresql
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U rtsc -d rtsc"]
